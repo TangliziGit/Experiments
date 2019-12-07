@@ -1,0 +1,42 @@
+
+Part 1
+
+1.
+(1):Start our transaction after step 1 and end it after step2;
+    Because the step2 operation is the real operation to the account.However the first step is only "chooses a part category from a menu" and the third is only a "displays all the retrieved parts' information".Both of them don't have any effecion on make the data inconsistent.So We don't have to add them in our transaction which will reduce the concurrency of the application.
+
+(2):Set the isolation level the transaction to read committed.
+    Because all the operation of tranction is only to read.In order to avoid the dirty proble and so on,we should set it to the isolation.
+
+2.
+(1):The transaction only query from the database,does not update datas to DBMS,so the isolation level should be Read Commited.
+
+(2):The transaction perform two operations,including update the data in the database,so it should be locked when a user is writing the data,the isolation level should be serializable.
+
+
+Part2
+
+1.
+(1):The hash index supported by PostgreSQL will improve the performance of the query.This query is an equality selection. In this case, hashing which has average O(1) operation is fast.Hash files use a hash function to convert the key of a record into a page address in which the record is to be stored.
+
+select * from census where encrypted_name='9946561';
+
+create index encrypted_name_index on census using hash(encrypted_name);
+
+(2):The btree index supported by PostgreSQL will improve the performance of the query.This query is an range selection. In this case, range queries is fast using for example B tree.In this query, PostgreSQL uses a sequential scan on the census table that visits 157,833 rows. The total run-time cost of this query is 456.73 disk-page fetch units and a total run time of 
+1500.89 msec.so we only need to access data range query.
+
+select * from census where family_income between 10500 and 55000;
+
+create index family_income_index on census using btree(family_income);
+
+
+2.
+Yes ,Because the indexing field of a cluster index may not have a unique value, but it corresponds to the ordering field of the data file. That is, a cluster index is defined on ordered files on a non-key field. 
+
+
+3.
+No,if the database is samll ,there is no need to use index.
+   Because when we use index that want to minimize the number of sequential scans used in an application.And an index is only useful when the number of tuples that satisfy a condition are small compared to the total number of tuples for the entire table.Creating index costs expensive.
+
+

@@ -1,0 +1,54 @@
+
+1. The sql sentences are as below:
+--drop table account;
+create table account
+(
+   id int,
+   balance float,
+   Primary Key(id) 
+);
+
+insert into account values (1, 105.59 );
+insert into account values (2, 1050.59 );
+
+2. Begin two sessions of the PostgreSQL client in two sepqrate console windows.
+3. The sql sentence in both windows is as below:
+   BEGIN TRANSACTION;
+4. The sql sentences are as below:
+   UPDATE account SET balance = 455.75
+   WHERE id = 2;
+5. The sql sentences are as below:
+   UPDATE account SET balance = 1400
+   WHERE id = 2;
+  
+   Update does not occur.It is waiting. 
+   Explaination:   This results in the second connection waiting until 
+                   the first connection releases its locks.
+6. The sql sentence is as follows: COMMIT;
+   The update occurs.
+   Explaination: The transacion in the second window is commited, the resoure is                              released.So the blocking is eliminated
+7. The sql sentence is as follows: COMMIT;
+8. The sql sentence is as below:
+   BEGIN TRANSACTION;
+9. The sql sentence is as below:
+   UPDATE account SET balance = 2400.00
+   WHERE id = 1;
+0. The sql sentence is as below:
+   UPDATE account SET balance = 2000.00
+   WHERE id = 2;
+11.The sql sentence is as below:
+   UPDATE account SET balance = 1400.00
+   WHERE id = 1;
+12. The sql sentence is as below:
+    UPDATE account SET balance = 1000.50
+    WHERE id = 2;
+13. The deadlock occurs. 
+    Explaination: two sessions have locks on separate objects and each process is                             trying to acquire a lock on the object that the other process has.
+14. The sql sentence is as below:
+    SELECT * FROM account;
+    In the first window, the output is 
+    ÐÐ  id(int4)    balance
+    1    2          2000
+    2    1          1400
+    
+    In the second window, error occurs. Because the  current transaction is aborted,             commands ignored until end of transaction block.

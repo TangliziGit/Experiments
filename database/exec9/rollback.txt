@@ -1,0 +1,50 @@
+3.Select balance of the checking account and paste the output in a file named rollback.txt. 
+
+输出：
+balance
+-------
+1050.59
+
+
+4.Delete both the savings and the checking accounts. Place the SQL query to perform this operation in rollback.txt. 
+
+delete from account where account.id=1 or account.id=2;
+
+
+5.Select all of the data in the account table and paste the output in rollback.txt. 
+
+输出为空
+
+
+7.Select the balance of the savings and checking accounts and paste the output in rollback.txt. 
+
+balance
+-------
+105.59      -- for id 1
+1050.59     -- for id 2
+
+
+9.Delete the savings account. Place the SQL code to do this in rollback.txt. 
+
+delete from account where account.id=1;
+
+
+10.Select all rows from the account table and paste the output in rollback.txt. 
+
+id          balance
+2           1050.59
+
+
+12.Attempt to rollback the transaction that you have just committed. What values are stored in the tables? Please explain the effects of transaction commits and rollbacks you have observed above. Place your explanation in rollback.txt. 
+
+a. 如果是指继续上一个提交过的事务，那么将会出现一个报错
+    WARNING: there is no transaction in progress.
+
+b. 如果是指重新开始刚才的事务，并最终选择回退，那么结果如下：
+
+    id          balance
+    1           105.59
+    2           1050.59
+
+    commit将事务提交。事务结束后，在事务中执行的SQL将生效。
+    rollback回退事务。事务结束后，在事务中执行的SQL将不生效。

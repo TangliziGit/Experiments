@@ -1,0 +1,44 @@
+1,List the primary key. 
+	The primary key is (EmpID,OrderNo,TrackingNum).
+
+2,List all the FDs. 
+	EmpID--->EmpName
+	OrderNo--->ShipToAddr
+	OrderNo--->ShippedDate
+	(EmpID,OrderNo,TrackingNum)--->EmpName(Partial Dependency)
+	(EmpID,OrderNo,TrackingNum)--->ShipToAddr(Partial Dependency)
+	(EmpID,OrderNo,TrackingNum)--->ShippedDate(Partial Dependency)
+
+3,List all the update anomalies and provide an example of each. 
+	1."insert anomaly"
+	  If you insert a "shipment" to the table, but you don't know who(EmpID) ship this "shipment", so the "insert" will fail, because the "EmpID" is PK which coudn't be NULL.
+	2."delete anomaly"
+	  If "EmpID" 1234 only ships one order "223".
+	Now "1234" don't ship the order "223", so you should delete the order "223", but the "OrderNo" is also a primary key. 
+	Then you have to delete all the other atrributes(delete the Tuple).
+	So the "delete anomaly" occurs.
+	3."alter complication"
+	  If multiple employees handle an order(for example "223").
+	If you alter the "223", you have to alter all the information in the Tuple which contain the "223".
+4£¬What normal form is the relation in? Explain. 
+	2NF
+	Because all the attributes is indivisible.
+	Amd because all the non-primary keys are full denpendent on the primary keys.
+5,Apply normalization to it incrementally, bringing the relation to 3NF. That is, if the relation is unnormalized, bring it to first normal form, then bring the first normal form you've just created to second normal form, and then bring the second normal form to third normal form. 
+	1.From 2NF to 3NF
+	  steps: downwards segmente, projection.
+	
+	divide to three relations:
+	  Employee(EmpID[PK], EmpName)
+	  Order(OrderNo[PK], ShipToAddr, ShippedDate)
+	  Shipment(TrackingNum[PK], EmpID, OrderNo)
+	
+	FDs:
+	  EmpID--->EmpName
+	  OrderNo--->ShipToAddr      OrderNo--->shippedDate
+	  TrackingNum--->EmpId       TrackingNum--->OrderNo
+	
+	Reason:
+	  Because all the attributes is indivisible.
+	  And because all the non-primary keys are full denpendent on the primary keys.
+	  And because the relations don't have Transmission Dependence.

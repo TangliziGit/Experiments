@@ -1,0 +1,109 @@
+
+1. The sql sentences are as below:
+--drop table account;
+create table account
+(
+   id int,
+   balance float,
+   Primary Key(id) 
+);
+
+insert into account values (1, 105.59 );
+insert into account values (2, 1050.59 );
+
+2. Begin two sessions of the PostgreSQL client in the two separate console windows.
+
+3. The sql sentence is as follows: BEGIN TRANSACTION;
+
+4. The sql sentence is as below:
+ UPDATE account SET balance =  455.66 
+ WHERE id = 2;
+5. The sql sentence is as below:
+   SELECT * FROM account;
+   The output are as below:
+   行  id(int4)    balance
+    1   1         105.59
+    2   2          455.66
+
+6. The sql sentence is as below:
+   SELECT * FROM account;
+   The output are as below:
+   行  id(int4)    balance
+    1    1         105.59
+    2    2         1050.59
+
+7. In the first window, the sql sentence is as below:
+   COMMIT;
+8. In the sencond window, the sql sentence is as below:
+   SELECT * FROM account;
+   The output are as below:
+   行  id(int4)    balance
+    1   1          105.59
+    2   2          455.66
+   Question: What has changed about the data and why?
+   Answer: The savings account changed.
+   Explaination: 
+                 Before the transaction is committed in the first window, there exists                        improper isolation,the data that shown from the first window is correct; 
+                 After the transaction is committed,
+                 the improper isolation is eliminated, so the data that shown from the first
+                 and the second are both right.
+9.In the second window, the sql sentence is as follows: COMMIT;
+
+10.In both windows, the sql sentence is as below:
+   BEGIN TRANSACTION;
+11. The sql sentence code is as below:
+    SET TRANSACTION ISOLATION LEVEL Serializable;
+12. The sql sentence code is as below:
+    UPDATE account SET  balance = 1400.00
+    WHERE id = 2;
+13. The sql sentence code is as below:
+    UPDATE account SET balance = 1
+    WHERE id = 1;
+14. The sql sentence code is as below: SELECT * FROM account;
+    In the first window, the output is as below:
+     行  id(int4)    balance
+     1   1           105.59
+     2   2           1400
+    In the sencond window, the output is as below:
+    行  id(int4)    balance
+    1   2           455.66
+    2   1           1
+15. The sql sentence code is as follows: COMMIT;
+16. The sql sentence code is as follows: SELECT * FROM account;
+    The output in the second window is as below:
+    行  id(int4)    balance
+    1   2           455.66
+    2   1           1
+    The output in the first window is as below:
+     行  id(int4)    balance
+     1   1           105.59
+     2   2           1400
+
+    So the data for the checking account in the second window
+    and the data for the savings account both have not changed.
+    Explanation: Serializable isolation prevents the current transaction from seeing commits                  made by other transactions. Thus, any commit made after the start of the                     first query of the transaction is not visible.
+17. The sql sentence in the second window are as below:
+     COMMIT;
+     SELECT * FROM account;
+
+   The sql sentence in the first window is as follows: SELECT * FROM account;
+   The output in the first window is as below:
+    行  id(int4)    balance
+    1   2           1400
+    2   1           1 
+   The output in the second window is as below:
+   行  id(int4)    balance
+    1   2           1400
+    2   1           1 
+  The balances of the checking and saving accounts in both window are all the same.
+  The balance of checking account has changed in the second window and the balance of 
+  savings account has changed in the first window has changed.
+  Explaination: This is because all the transactions are all commited, the Serializable 
+                isolatin provides a stable view of the database. So the data
+                in both window are all the same.
+  
+
+
+
+
+

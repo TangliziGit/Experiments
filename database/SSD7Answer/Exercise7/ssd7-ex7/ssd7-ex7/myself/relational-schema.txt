@@ -1,0 +1,139 @@
+/*
+*@author:wangzhesi
+*053597
+*/
+*****Step1*****
+For strong entity,Create a new table.Including as its columns, all the simple attributes and simple components of the composite attributes . 
+We map all the entities types into tables and define their primary keys PKs and alternate keys AKs.Do not include any multi-valued attribute as a key. 
+
+Book(Author,Title, ISBN, Edition, PublicationDate, Price, BookDescription)
+PK(ISBN)
+
+Publisher(Publisher_id, PublisherName, PublisherAddress)
+PK(Publisher_id)
+
+Author(Author_id, AuthorName)
+PK(Author_id)
+
+Categories(Categories_id, CategoriesName)
+PK(Categories_id)
+
+Promotion(Promotion_id, Discount, StartDate, EndDate)
+PK(Promotion_id)
+
+Orders(Order_num, MailAddress, MethodShipment, ShippingDate, DateOrderTime)
+PK(Order_num)
+
+Customer(Customer_id, CustomerName, MailAddress, CreditNumer, EmailAddress)
+PK(Customer_id)
+
+Shipment(Tracking_num, ShipmentDate, Order_num, ExpectedDate)
+PK(Tracking_num)
+
+*****Step2*****
+We do not take any action, since there are no weak entities satisfying the 1:1 relationship constraint.
+
+*****Step3*****
+We create a table for each remaining weak entity that was not handled in step 2.
+LineItem has particpate a 1:N relationship.
+
+LineItem(ShippingCost, PurchasedQuantity, BookPrice, Tax, ISBN, Tracking_num, Order_num)
+PK(ISBN, Tracking_num)
+FK(ISBN) -> (ISBN)
+FK(Order_num) -> (Order_num)
+FK(Tracking_num) -> (Tracking_num)
+
+*****Step 4*****
+We consider the binary 1:1 relationships. 
+But in this model,there is no 1:1 relationship.
+
+*****Step 5*****
+For each relationship that is "1:N",Identify "1" is the father entity,"N"is the children entity,
+Including as a foreign key in children entity, the primary key of father entity. 
+
+Book(Author,Title, SBN, Publisher_id, Edition, PublicationDate, Price, BookDescription, Categories_id)
+PK(ISBN)
+FK(Publisher_id) -> (Publisher_id),
+FK(PCategories_id) -> (Categories_id)
+
+Categories(Categories_id, CategoriesName, SubCategories_id)
+PK(Categories_id)
+FK(SubCategories_id) -> Categories(Categories_id)
+
+Orders(Order_num, Customer_id, MailAddress, MethodShipment, ShippingDate, DateOrderTime)
+PK(Order_num)
+FK(Customer_id) -> Customer(Customer_id)
+
+*****Step 6*****
+We consider the M:N relationships.  We create a new table to store this relationship and its attribute.
+In my model,Book_Promotion, Book_Category and Book_Author are such relationships.
+
+Book_Promotion(ISBN, Promotion_id)
+PK(ISBN, Promotion_id)
+FK(ISBN) -> Book(ISBN)
+FK(Promotion_id) -> Promotion(Promotion_id)
+
+Book_Author(ISBN, Author_id)
+PK(ISBN, Author_id)
+FK(ISBN) -> Book(ISBN)
+FK(Author_id) -> Author(Author_id)
+
+Book_Category(ISBN, Category_id)
+PK(ISBN, Category_id)
+FK(ISBN) -> Book(SIBN)
+FK(Category_id) -> Category(Category_id)
+
+*****Step 7*****
+We do not take any action.Because we have no multi-valued attribute in this model.
+
+******************************************************************************************************
+Let us conclude by listing the entire relational schema produced above. It is worth recalling here that PK, AK, and FK correspond to PRIMARY KEY, UNIQUE and FOREIGN KEY REFERENCES statements, respectively, in SQL. 
+
+Book(Author,Title, SBN, Publisher_id, Edition, PublicationDate, Price, BookDescription, Categories_id)
+PK(ISBN)
+FK(Publisher_id) -> (Publisher_id),
+FK(PCategories_id) -> (Categories_id)
+
+Publisher(Publisher_id, PublisherName, PublisherAddress)
+PK(Publisher_id)
+
+Author(Author_id, AuthorName)
+PK(Author_id)
+
+Categories(Categories_id, CategoriesName, SubCategories_id)
+PK(Categories_id)
+FK(SubCategories_id) -> Categories(Categories_id)
+
+Orders(Order_num, Customer_id, MailAddress, MethodShipment, ShippingDate, DateOrderTime)
+PK(Order_num)
+FK(Customer_id) -> Customer(Customer_id)
+
+Promotion(Promotion_id, Discount, StartDate, EndDate)
+PK(Promotion_id)
+
+Customer(Customer_id, CustomerName, MailAddress, CreditNumer, EmailAddress)
+PK(Customer_id)
+
+Shipment(Tracking_num, ShipmentDate, Order_num, ExpectedDate)
+PK(Tracking_num)
+
+LineItem(ShippingCost, PurchasedQuantity, BookPrice, Tax, ISBN, Tracking_num, Order_num)
+PK(ISBN, Tracking_num)
+FK(ISBN) -> (ISBN)
+FK(Order_num) -> (Order_num)
+FK(Tracking_num) -> (Tracking_num)
+
+Book_Promotion(ISBN, Promotion_id)
+PK(ISBN, Promotion_id)
+FK(ISBN) -> Book(ISBN)
+FK(Promotion_id) -> Promotion(Promotion_id)
+
+Book_Author(ISBN, Author_id)
+PK(ISBN, Author_id)
+FK(ISBN) -> Book(ISBN)
+FK(Author_id) -> Author(Author_id)
+
+Book_Category(ISBN, Category_id)
+PK(ISBN, Category_id)
+FK(ISBN) -> Book(SIBN)
+FK(Category_id) -> Category(Category_id)

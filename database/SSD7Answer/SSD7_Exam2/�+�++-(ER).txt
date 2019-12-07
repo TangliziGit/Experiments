@@ -1,0 +1,25 @@
+---Strong Entities
+Bank(BankID(PK), Name, Address)
+
+BankBranch(BankBranchID(PK), BandBranchName)
+
+Account(AccountID(PK), Balance)
+
+Customer(CustomerID(PK), Name, Tel, Address)
+
+---Weak Entities
+Transaction(TransactionsID(PK), Deposit, Withdrawal, Date)
+
+---Relationships
+1.has:<Bank,BankBranch>,1:N,total/total
+2.belong:<Account,BankBranch>,1:1,total/total
+3.operated:<Account,Transaction>,M:N,total/partial
+4.has:<Customer,Account>,1:N,total/total
+
+---Assumption
+1.A bank has several branches.
+2.A customer may have one or more accounts.
+3.A customer may have accounts in one or more branches.
+4.An account must belong to one and only one branch
+5.Each account is operated on by any types of transactions.
+6.Any types of transactions can serve for many account.

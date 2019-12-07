@@ -1,0 +1,9 @@
+Select Book.Title,Book.Price 
+From Book,Publisher
+where Book.PublisherID = Publisher.PublisherID And
+(Publisher.Name = 'University of Illinois Press' Or Publisher.Name = 'University of Waterloo Press');
+
+I use select,project and join operations in the quary.
+I use project operations of "Select Book.Title,Book.Price From Book,Publisher" to choice the information I want to get.
+I use join operations of "where Book.PublisherID = Publisher.PublisherID" to join Table Book and Table Publisher with constrains of PublisherID.
+I use select operations of "(Publisher.Name = 'University of Illinois Press' Or Publisher.Name = 'University of Waterloo Press')" to select the book title and book price with certain constrains.

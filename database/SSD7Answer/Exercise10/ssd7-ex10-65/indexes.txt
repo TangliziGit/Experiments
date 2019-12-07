@@ -1,0 +1,299 @@
+
+1. Optimize the real estate tables above. Perform the following operations. 
+
+
+    (2) Analyze the storage characteristics of the tables when stored in the database. You are to submit the most accurate estimate of the number of tuples for each table and the number of disk pages that are used to store each table. Submit the code necessary to gather this information as well as the output of these queries. What do you calculate as the blocking factor for each table? 
+
+		table Lot:
+			realestate=# select relname,reltuples,relpages
+			realestate-# from pg_class
+			realestate-# where relname='lot';
+			 relname | reltuples | relpages
+			---------+-----------+----------
+			 lot     |    249990 |     3122
+			(1 行)
+
+		table Customer:
+			realestate=# select relname,reltuples,relpages
+			realestate-# from pg_class
+			realestate-# where relname='customer';
+			 relname  | reltuples | relpages
+			----------+-----------+----------
+			 customer |    249999 |     1970
+			(1 行)
+
+		table Customer_lot:
+			realestate=# select relname,reltuples,relpages
+			realestate-# from pg_class
+			realestate-# where relname='customer_lot';
+			   relname    | reltuples | relpages
+			--------------+-----------+----------
+			 customer_lot |    249999 |     1352
+			(1 行)
+			blocking factor:
+				lot relation: 249990/3122=80
+				customer relation: 249999/1970=127
+				customer_lot relation: 249999/1352=18511
+
+
+
+    (3) Analyze the run time characteristics of each query given above. Report both PostgreSQL's estimate and the actual total cost expressed in the number of disk accesses and the amount of time that each query takes to run. Submit the code necessary for gathering this data.
+
+		<1> Selecting the lot_id for all lots in a given size range. An example of such a query would be select lot_id from lot where lot_size between 300 and 15000;
+
+			realestate=# explain analyze
+			realestate-# select lot_id
+			realestate-# from lot
+			realestate-# where lot_size between 300 and 15000;
+
+                        	                          QUERY PLAN
+
+			 Seq Scan on lot  (cost=0.00..6871.85 rows=148074 width=4) (actual time=31.000..2845.000 rows=147220 loops=1)
+			 Filter: ((lot_size >= 300::double precision) AND (lot_size <= 15000::double precision))
+			 Total runtime: 3250.000 ms
+			 (3 行)
+		---------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<2> Selecting the lot_id for all lots in a given value range. An example of such a query would be select lot_id from lot where lot_value between 3000 and 15000; 
+
+			realestate=# explain analyze
+			realestate-# select lot_id
+			realestate-# from lot
+			realestate-# where lot_value between 3000 and 15000;
+
+                        	                       QUERY PLAN
+
+			 Seq Scan on lot  (cost=0.00..6871.85 rows=3378 width=4) (actual time=0.000..1001.000 rows=3045 loops=1)
+			 Filter: ((lot_value >= 3000::double precision) AND (lot_value <= 15000::double precision))
+			 Total runtime: 1031.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<3> Selecting all of the information for a specific customer. An example of such a query would be select * from customer where customer_id=12;
+
+			realestate=# explain analyze
+			realestate-# select *
+			realestate-# from customer
+			realestate-# where customer_id=12;
+
+	                                               QUERY PLAN
+
+			 Seq Scan on customer  (cost=0.00..5094.99 rows=1 width=22) (actual time=0.000..1063.000 rows=1 loops=1)
+			 Filter: (customer_id = 12)
+			 Total runtime: 1063.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<4> Inserting new customer or lot data. An example of such a query would be insert into customer values (250001, 'Vince', 'Smith' );
+
+			realestate=# explain analyze
+			realestate-# insert into customer
+			realestate-# values (250001,'Vince','Smith');
+
+                        		             QUERY PLAN
+
+			 Result  (cost=0.00..0.01 rows=1 width=0) (actual time=0.000..0.000 rows=1 loops=1)
+			 Total runtime: 156.000 ms
+			 (2 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<5> Deleting a row of customer or lot data. An example of such a query would be delete from customer where customer_id='250001';
+
+			realestate=# explain analyze
+			realestate-# delete from customer
+			realestate-# where customer_id='250001';
+
+                        	                       QUERY PLAN
+
+			 Seq Scan on customer  (cost=0.00..5094.99 rows=1 width=6) (actual time=938.000..938.000 rows=1 loops=1)
+			 Filter: (customer_id = 250001)
+			 Total runtime: 938.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<6> Updating a row of customer or lot data. An example of such a query would be update customer set customer_first_name='Vinny' where customer_id='249001';
+
+			realestate=# explain analyze
+			realestate-# update customer
+			realestate-# set customer_first_name='Vinny'
+			realestate-# where customer_id='249001';
+
+                        	                        QUERY PLAN
+
+			 Seq Scan on customer  (cost=0.00..5094.99 rows=1 width=19) (actual time=922.000..922.000 rows=1 loops=1)
+			 Filter: (customer_id = 249001)
+			 Total runtime: 937.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<7> Selecting the average lot size of all lots. An example of such a query would be select avg(lot_size) from lot;
+
+			realestate=# explain analyze
+			realestate-# select avg(lot_value)
+			realestate-# from lot;
+
+                                                     QUERY PLAN
+
+			 Aggregate  (cost=6246.88..6246.88 rows=1 width=8) (actual time=2890.000..2890.000 rows=1 loops=1)
+			   ->  Seq Scan on lot  (cost=0.00..5621.90 rows=249990 width=8) (actual time=15.000..1578.000 rows=249999 loops=1)
+			 Total runtime: 2937.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	(4) For each query above, suggest an index, if applicable, to improve performance. To answer this question completely, you must state what columns you are indexing and what index you will use. You must fully defend your choice with a complete explanation. If an index is not appropriate for a query, clearly state why. Note that you may only use indexes supported in PostgreSQL, e.g. hash or b-tree. You may also use clustering.
+
+	Query types 1 and 2 both use a sequential scan for a particular range of values. These queries may be aided by a b-tree on the columns referenced in the where clause.
+	Query type 3 uses an equality selection condition based on customer id. In this case, the performance will be helped using a hash on the customer id.
+	Query 4 is an insert and should not be indexed, although, it is on a value that is also queried in query 2. In this case, the b-tree from query 2 will most likely cause performance to suffer.
+	Queries 5 and 6 both use sequential scans and will be aided by a hash on the customer id and the lot id.
+	Query 7 is an aggregate function that performs a sequential scan of the lot table.
+
+	These indexes may be built with the following sql statements:
+		create index customer_id_index on customer using hash(customer_id);
+		create index lot_id_index on lot using hash(lot_id);
+		create index lot_value_index on lot using btree(lot_value);
+		create index lot_size_index on lot using btree(lot_size);
+
+	The lot_value index may be clustered using cluster lot_value_index on lot. The lot_size index may be clustered using cluster lot_size_index on lot.
+
+
+
+	(5) Implement the indexes that you proposed in the previous step and analyze the run-time performance of the same queries that you ran in step three. Submit a table showing the number of estimated and actual total cost expressed in the number of disk page accesses and query run times after the index was used. Also compute the percentage increase or decrease in performance (based on run time) that results from indexing the tables. If no performance benefit was gained from the index, you must explain why.
+
+		<1> Selecting the lot_id for all lots in a given size range. An example of such a query would be select lot_id from lot where lot_size between 300 and 15000;
+
+			realestate=# explain analyze
+			realestate-# select lot_id
+			realestate-# from lot
+			realestate-# where lot_size between 300 and 15000;
+
+                                                 QUERY PLAN
+
+			 Seq Scan on lot  (cost=0.00..6872.07 rows=146555 width=4) (actual time=0.000..830.000 rows=147220 loops=1)
+			 Filter: ((lot_size >= 300::double precision) AND (lot_size <= 15000::double precision))
+			 Total runtime: 1000.000 ms
+			 (3 行)
+		---------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<2> Selecting the lot_id for all lots in a given value range. An example of such a query would be select lot_id from lot where lot_value between 3000 and 15000;
+
+			realestate=# explain analyze
+			realestate-# select lot_id
+			realestate-# from lot
+			realestate-# where lot_value between 3000 and 15000;
+
+                                               QUERY PLAN
+
+			 Seq Scan on lot  (cost=0.00..6872.07 rows=2941 width=4) (actual time=0.000..563.000 rows=3045 loops=1)
+			 Filter: ((lot_value >= 3000::double precision) AND (lot_value <= 15000::double precision))
+			 Total runtime: 563.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<3> Selecting all of the information for a specific customer. An example of such a query would be select * from customer where customer_id=12;
+
+			realestate=# explain analyze
+			realestate-# select *
+			realestate-# from customer
+			realestate-# where customer_id=12;
+
+                                                          QUERY PLAN
+
+			 Index Scan using customer_id_index on customer  (cost=0.00..6.01 rows=1 width=22) (actual time=16.000..16.000 rows=1 loops=1)
+			 Index Cond: (customer_id = 12)
+			 Total runtime: 16.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<4> Inserting new customer or lot data. An example of such a query would be insert into customer values (250001, 'Vince', 'Smith' );
+
+			realestate=# explain analyze
+			realestate-# insert into customer
+			realestate-# values(250001,'Vince','Smith');
+
+                        	             QUERY PLAN
+
+			 Result  (cost=0.00..0.01 rows=1 width=0) (actual time=0.000..0.000 rows=1 loops=1)
+			 Total runtime: 16.000 ms
+			 (2 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<5> Deleting a row of customer or lot data. An example of such a query would be delete from customer where customer_id='250001';
+
+			realestate=# explain analyze
+			realestate-# delete from customer
+			realestate-# where customer_id='250001';
+
+                                                         QUERY PLAN
+
+			 Index Scan using customer_id_index on customer  (cost=0.00..6.01 rows=1 width=6) (actual time=0.000..0.000 rows=1 loops=1)
+			 Index Cond: (customer_id = 250001)
+			 Total runtime: 0.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<6> Updating a row of customer or lot data. An example of such a query would be update customer set customer_first_name='Vinny' where customer_id='249001';
+
+			realestate=# explain analyze
+			realestate-# update customer
+			realestate-# set customer_first_name='Vinny'
+			realestate-# where customer_id='249001';
+
+                                                          QUERY PLAN
+
+			 Index Scan using customer_id_index on customer  (cost=0.00..6.01 rows=1 width=19) (actual time=16.000..16.000 rows=1 loops=1)
+			 Index Cond: (customer_id = 249001)
+			 Total runtime: 16.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		<7> Selecting the average lot size of all lots. An example of such a query would be select avg(lot_size) from lot;
+
+			realestate=# explain analyze
+			realestate-# select avg(lot_value)
+			realestate-# from lot;
+
+                                                    QUERY PLAN
+
+			 Aggregate  (cost=6247.07..6247.07 rows=1 width=8) (actual time=1235.000..1235.000 rows=1 loops=1)
+			   ->  Seq Scan on lot  (cost=0.00..5622.05 rows=250005 width=8) (actual time=0.000..722.000 rows=249999 loops=1)
+			 Total runtime: 1250.000 ms
+			 (3 行)
+		-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		****************************************************************************************************************
+			Without Index				With Index					Performance
+														Improvement
+		----------------------------------------------------------------------------------------------------------------
+		Query	Estimated	Actual Disk	Actual  	Estimated	Actual Disk	Actual
+		Number	Disk Accesses	Accesses	Run		Disk Accesses	Accessed	Run
+							Time						Time
+		----------------------------------------------------------------------------------------------------------------
+		1	6871.85		2845.00		3250.00		6872.07		830.00		1000.00	  69.23%
+		----------------------------------------------------------------------------------------------------------------
+		2	6871.85		1001.00		1031.00		6872.07		563.00		563.00	  45.39%
+		----------------------------------------------------------------------------------------------------------------
+		3	5094.99		1063.00		1063.00		6.01		16.00		16.00	  98.49%
+		----------------------------------------------------------------------------------------------------------------
+		4	0.01		0.00		156.00		0.01		0.00		16.00	  89.74%
+		----------------------------------------------------------------------------------------------------------------
+		5	5094.99		938.00		938.00		6.01		0.00		0.00	  100%
+		----------------------------------------------------------------------------------------------------------------
+		6	5094.99		922.00		937.00		6.01		16.00		16.00	  98.29%
+		----------------------------------------------------------------------------------------------------------------
+		7	6246.88		2890.00		2937.00		6247.07		1235.00		1250.00	  57.44%
+		****************************************************************************************************************
+
+	(6) Given the data that you have now obtained, which queries do index structures slow down and which do they speed up? If query types 1, 2 and 3 are common (occurring 75% of the time) and types 4 is uncommon (occurring 25% of the time), does the increase in performance for some queries outweigh the decreases of others? How would your opinion change if the ratio were closer to 50% for queries 1, 2, and 3, and 50% for type 4?
+
+		that seems every queries has been inproved.
+------------------------------------------------------------------------------------------------------------------------
+
+
+
+2. You are designing a database to store sensor records for a research study. For the first year, the database will mostly be populated via insert statements gathered from these sensors. After the first year, the database will mainly be queried for data via select statements. You must decide whether to index the database initially or wait until after the first year. From what you have witnessed, would you initially index the table or wait until after the first year? Explain.
+
+	For performance purposes, it is best to wait until the database is mainly static before indexing it. Indexing the database will lead to poor performance while populating it because indexes slow down inserts. The selection queries will most likely run faster after the tables are indexed when it becomes static.
+
+
+--------------------------------------------------------------------------------------------------------------------------
+
+3. You are employed by a local hospital as one of team of database professionals. A colleague has implemented a table that stores information about patients in PostgreSQL. You are asked to obtain all records for any female patient. You write a query select * from patient where gender='f'; You notice that query performance is poor. Your colleague who implemented the patient table is currently away and it is your responsibility to determine what is wrong. 
+
+	The selectivity of the data is not high in the 50% male, 50% female case. The dbms must scan each disk block, even with an index, to find the data because the probability is high that each block contains both male and female records. The index may be used to scan a subset of the data, thus increasing performance, if the index was clustered. Clustering will re-order the datafile to match the order of the index. This will groups all males and females together, thus, roughly 50% of the disk blocks must be read, not 100%.
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+4. Recall that PostgreSQL stores statistics about tables in the system table called pg_class. The query planner accesses this table for every query. These statistics may only be updated using the analyze command. If the analyze command is not run often, the statistics in this table may not be accurate and the query planner may make poor decisions which can degrade system performance. Another strategy is for the query planner to generate these statistics for each query (including selects, inserts, updates, and deletes). This approach would allow the query planner to have the most up-to-date statistics possible. Why doesn't PostgreSQL do this?
+
+	Calculating the statistics in the pg_class table for each query will allow PostgreSQL to have the most accurate statistics possible for each query plan, however, it will degrade the performance of every query because the planner must generated these statistics for all queries, which will likely be worse than running the query using slightly stale statistics.
+----------------------------------------------------------------------------------------------------------------------------

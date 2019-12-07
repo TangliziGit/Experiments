@@ -1,0 +1,31 @@
+2.1,List the primary key. 
+	The primary key is PK(PartID,SupplierID)
+
+2.2,List all the FDs. 
+	PartID--->PartName
+	SupplierID--->SupplierName
+	(PartID,SupplierID)--->PartName(Partial Dependency)
+	(PartID,SupplierID)--->SupplierName(Partial Dependency)
+
+2.3,What normal form is the relation in? Explain. 
+	1NF
+	Because all the attributes is indivisible.
+
+2.4,Apply normalization to it incrementally, carrying the normalization process through each of the higher normal forms possible up to 3NF. That is, if the relation were unnormalized, bring it to first normal form, then bring the first normal form you've just created to second normal form, and then bring the second normal form to third normal form.
+	1.From 1NF to 2NF
+	  steps: downwards segmente, projection.
+	
+	divide to two relations:
+	  Part(PartID[PK],PartName)
+	  Supplier(SupplierID[PK],SupplierName)
+	
+	FDs:
+	  PartID--->PartName
+	  SupplierID--->SupplierName
+
+	Reason:
+	  Because all the attributes is indivisible.
+	  And because all the non-primary keys are full denpendent on the primary keys.
+
+	2.The two relations above also come up to 3NF.
+	  Because the relations don't have Transmission Dependence.

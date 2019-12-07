@@ -1,0 +1,47 @@
+5.
+
+第一个窗口发生等待。
+原因：
+第二个窗口率先获得到checking account的更新锁。
+因为这是一个独占锁（排他锁），所以第一个窗口在update时，等待checking account的更新锁。
+
+
+6.
+
+第二个窗口commit后，第一个窗口几乎同时执行update操作成功。
+因为率先获得到锁的第二个窗口在commit后释放锁，所以等待锁的第一个窗口获得锁，然后完成update操作。
+
+13.
+
+发生死锁，两个窗口同时等待。等待1077ms后，死锁解除。
+
+（1）发生死锁原因
+因为两个窗口同时等待对方持有的独占锁，第一窗口持有checking account锁，等待saving account锁，同时第二窗口持有saving account锁，等待checking account锁。
+
+（2）死锁解除原因
+数据库通过死锁检测机制，按某个周期来检测死锁。若有死锁发生，随机回滚在死锁状态下的一个事务，从而使得其他事务获得对应的锁。
+
+
+
+14.
+
+first window:
+id          balance
+2           2000
+1           1400
+
+second window:
+查询报错：
+ERROR: current transaction is aborted, commands ignored until end of transaction block SQL state: 25P02
+此时只能进行rollback，事务回滚后才能查询:
+
+id          balance
+1           105.59
+2           1400
+发现两个窗口查询结果不同，原因是窗口1未提交
+当窗口1提交后，两个窗口查询结果相同。
+
+id          balance
+2           2000
+1           1400
+

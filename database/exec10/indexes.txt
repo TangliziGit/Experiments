@@ -1,0 +1,328 @@
+A.
+    2. Analyze the storage characteristics of the tables when stored in the database. You are to submit the most accurate estimate of the number of tuples for each table and the number of disk pages that are used to store each table. Submit the code necessary to gather this information as well as the output of these queries. What do you calculate as the blocking factor for each table? 
+
+    exec10=# select relname, reltuples, relpages from pg_class where relname='lot';
+     relname | reltuples | relpages 
+    ---------+-----------+----------
+     lot     |    249999 |     2688
+    (1 row)
+
+    exec10=# select relname, reltuples, relpages from pg_class where relname='customer';
+     relname  | reltuples | relpages 
+    ----------+-----------+----------
+     customer |    249999 |     1441
+    (1 row)
+
+    exec10=# select relname, reltuples, relpages from pg_class where relname='customer_lot';
+       relname    | reltuples | relpages 
+    --------------+-----------+----------
+     customer_lot |    249999 |     1107
+    (1 row)
+
+    blocking factors:
+        - lot:
+            249999 / 2688 = 93
+        - customer:
+            249999 / 1441 = 173
+        - customer_lot:
+            249999 / 1107 = 225
+
+
+    3. Analyze the run time characteristics of each query given above. Report both PostgreSQL's estimate and the actual total cost expressed in the number of disk accesses and the amount of time that each query takes to run. Submit the code necessary for gathering this data.
+
+        1. Selecting the lot_id for all lots in a given size range. An example of such a query would be select lot_id from lot where lot_size between 300 and 15000;
+
+        explain analyze select lot_id from lot where lot_size between 300 and 15000;
+        -----------------------------------------------------------------------------------------------------------
+         Seq Scan on lot  (cost=0.00..6437.98 rows=147376 width=4) (actual time=0.116..49.312 rows=147220 loops=1)
+           Filter: ((lot_size >= '300'::double precision) AND (lot_size <= '15000'::double precision))
+           Rows Removed by Filter: 102779
+         Planning Time: 0.205 ms
+         Execution Time: 56.280 ms
+        (5 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：6437.98
+        实际的硬盘时间：0.116
+        实际的总用时  ：49.321
+
+
+        2. Selecting the lot_id for all lots in a given value range. An example of such a query would be select lot_id from lot where lot_value between 3000 and 15000;
+
+        explain analyze select lot_id from lot where lot_value between 3000 and 15000;
+        ----------------------------------------------------------------------------------------------------------------------
+         Gather  (cost=1000.00..6191.27 rows=2974 width=4) (actual time=0.510..36.152 rows=3045 loops=1)
+           Workers Planned: 1
+           Workers Launched: 1
+           ->  Parallel Seq Scan on lot  (cost=0.00..4893.87 rows=1749 width=4) (actual time=0.030..27.758 rows=1522 loops=2)
+                 Filter: ((lot_value >= '3000'::double precision) AND (lot_value <= '15000'::double precision))
+                 Rows Removed by Filter: 123477
+         Planning Time: 0.164 ms
+         Execution Time: 36.434 ms
+        (8 rows)
+        估计的硬盘时间：1000
+        估计的总用时  ：6191.27
+        实际的硬盘时间：0.03
+        实际的总用时  ：27.758
+
+
+        3. Selecting all of the information for a specific customer. An example of such a query would be select * from customer where customer_id=12;
+
+        explain analyze select * from customer where customer_id=12;
+        ---------------------------------------------------------------------------------------------------------------------
+         Gather  (cost=1000.00..4279.33 rows=1 width=16) (actual time=0.412..12.246 rows=1 loops=1)
+           Workers Planned: 1
+           Workers Launched: 1
+           ->  Parallel Seq Scan on customer  (cost=0.00..3279.23 rows=1 width=16) (actual time=3.047..8.280 rows=0 loops=2)
+                 Filter: (customer_id = 12)
+                 Rows Removed by Filter: 124999
+         Planning Time: 0.262 ms
+         Execution Time: 12.289 ms
+        (8 rows)
+        估计的硬盘时间：1000
+        估计的总用时  ：4279.33
+        实际的硬盘时间：0.412
+        实际的总用时  ：12.246
+
+        4. Inserting new customer or lot data. An example of such a query would be insert into customer values (250001, 'Vince', 'Smith' );
+
+        explain analyze insert into customer values (250001, 'Vince', 'Smith');
+        --------------------------------------------------------------------------------------------------
+         Insert on customer  (cost=0.00..0.01 rows=1 width=440) (actual time=0.058..0.058 rows=0 loops=1)
+           ->  Result  (cost=0.00..0.01 rows=1 width=440) (actual time=0.002..0.002 rows=1 loops=1)
+         Planning Time: 0.040 ms
+         Execution Time: 0.078 ms
+        (4 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：0.01
+        实际的硬盘时间：0.058
+        实际的总用时  ：0.058
+
+        5. Deleting a row of customer or lot data. An example of such a query would be delete from customer where customer_id='250001';
+
+        explain analyze delete from customer where customer_id='250001';
+        -------------------------------------------------------------------------------------------------------------
+         Delete on customer  (cost=0.00..4565.99 rows=1 width=6) (actual time=15.398..15.398 rows=0 loops=1)
+           ->  Seq Scan on customer  (cost=0.00..4565.99 rows=1 width=6) (actual time=15.386..15.387 rows=1 loops=1)
+                 Filter: (customer_id = 250001)
+                 Rows Removed by Filter: 249999
+         Planning Time: 0.036 ms
+         Execution Time: 15.443 ms
+        (6 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：4565.99
+        实际的硬盘时间：15.398
+        实际的总用时  ：15.398
+
+        6. Updating a row of customer or lot data. An example of such a query would be update customer set customer_first_name='Vinny' where customer_id='249001';
+
+        explain analyze update customer set customer_first_name='Vinny' where customer_id='249001';
+        ---------------------------------------------------------------------------------------------------------------
+         Update on customer  (cost=0.00..4565.99 rows=1 width=234) (actual time=17.157..17.157 rows=0 loops=1)
+           ->  Seq Scan on customer  (cost=0.00..4565.99 rows=1 width=234) (actual time=17.091..17.141 rows=1 loops=1)
+                 Filter: (customer_id = 249001)
+                 Rows Removed by Filter: 249998
+         Planning Time: 0.078 ms
+         Execution Time: 17.186 ms
+        (6 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：4565.99
+        实际的硬盘时间：17.157
+        实际的总用时  ：17.157
+
+        7. Selecting the average lot size of all lots. An example of such a query would be select avg(lot_size) from lot;
+
+        explain analyze select avg(lot_size) from lot;
+        --------------------------------------------------------------------------------------------------------------------------------------
+         Finalize Aggregate  (cost=5526.34..5526.35 rows=1 width=8) (actual time=22.920..22.920 rows=1 loops=1)
+           ->  Gather  (cost=5526.23..5526.34 rows=1 width=32) (actual time=22.828..24.266 rows=2 loops=1)
+                 Workers Planned: 1
+                 Workers Launched: 1
+                 ->  Partial Aggregate  (cost=4526.23..4526.24 rows=1 width=32) (actual time=19.670..19.670 rows=1 loops=2)
+                       ->  Parallel Seq Scan on lot  (cost=0.00..4158.58 rows=147058 width=8) (actual time=0.014..10.316 rows=125000 loops=2)
+         Planning Time: 0.232 ms
+         Execution Time: 24.348 ms
+        (8 rows)
+        估计的硬盘时间：5526.34
+        估计的总用时  ：5526.35
+        实际的硬盘时间：22.920
+        实际的总用时  ：22.920
+
+    4. For each query above, suggest an index, if applicable, to improve performance. To answer this question completely, you must state what columns you are indexing and what index you will use. You must fully defend your choice with a complete explanation. If an index is not appropriate for a query, clearly state why. Note that you may only use indexes supported in PostgreSQL, e.g. hash or b-tree. You may also use clustering.
+        对第一个和第二个查询，因为是范围查询，所以在lot_size和lot_value上，btree更合适作为索引。
+        对第三个查询，因为是单点查询，所以在customer_id上采用hash作为索引更合适。
+        对第四个语句，因为是插入语句，所以没有查询，于是就无法使用索引来做优化。
+        对第五个语句，因为是单点删除，所以在customer_id上采用hash作为索引更合适。
+        对第六个语句，是一个单点更新，所以在customer_first_name上采用hash作为索引。
+        对第七个语句，是一个聚合(aggregate)操作，时间复杂度理论下界就是O(n)，所以不需要新建索引。
+
+        综上，得出新建索引语句：
+        create index lot_size_index on lot using btree(lot_size);
+        create index lot_value_index on lot using btree(lot_value);
+        create index customer_id_index on customer using hash(customer_id);
+        create index customer_first_name_index on customer using hash(customer_first_name);
+
+        接下来做聚簇优化：
+        如果你只是随机的访问表中的行，那么表中数据的实际存储顺序是无关紧要的。 但是，如果对某些特定数据的访问较多，而且有一个索引将这些数据分组，那么使用CLUSTER会非常有益处。 如果从一个表中请求一定索引范围的值，或者是一个索引值对应多行，CLUSTER也会有助于应用，因为如果索引标识出第一匹配行所在的存储页，所有其它行也可能已经在同一个存储页里了，这样便节省了磁盘访问的时间，加速了查询。
+        这里选用lot_size_index为例:
+        cluster lot using lot_size_index;
+
+    5. Implement the indexes that you proposed in the previous step and analyze the run-time performance of the same queries that you ran in step three. Submit a table showing the number of estimated and actual total cost expressed in the number of disk page accesses and query run times after the index was used. Also compute the percentage increase or decrease in performance (based on run time) that results from indexing the tables. If no performance benefit was gained from the index, you must explain why. You may use the following table as a basis:
+
+        1. Selecting the lot_id for all lots in a given size range. An example of such a query would be select lot_id from lot where lot_size between 300 and 15000;
+
+        explain analyze select lot_id from lot where lot_size between 300 and 15000;
+        -----------------------------------------------------------------------------------------------------------
+         Seq Scan on lot  (cost=0.00..6438.98 rows=147376 width=4) (actual time=0.502..38.684 rows=147220 loops=1)
+           Filter: ((lot_size >= '300'::double precision) AND (lot_size <= '15000'::double precision))
+           Rows Removed by Filter: 102779
+         Planning Time: 0.808 ms
+         Execution Time: 46.593 ms
+        (5 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：6438.98
+        实际的硬盘时间：0.502
+        实际的总用时  ：38.684
+
+
+        2. Selecting the lot_id for all lots in a given value range. An example of such a query would be select lot_id from lot where lot_value between 3000 and 15000;
+
+        explain analyze select lot_id from lot where lot_value between 3000 and 15000;
+        -------------------------------------------------------------------------------------------------------------------------------
+         Bitmap Heap Scan on lot  (cost=66.78..2922.21 rows=2962 width=4) (actual time=1.660..5.142 rows=3045 loops=1)
+           Recheck Cond: ((lot_value >= '3000'::double precision) AND (lot_value <= '15000'::double precision))
+           Heap Blocks: exact=1803
+           ->  Bitmap Index Scan on lot_value_index  (cost=0.00..66.04 rows=2962 width=0) (actual time=1.092..1.093 rows=3045 loops=1)
+                 Index Cond: ((lot_value >= '3000'::double precision) AND (lot_value <= '15000'::double precision))
+         Planning Time: 0.444 ms
+         Execution Time: 5.481 ms
+        (7 rows)
+        估计的硬盘时间：66.78
+        估计的总用时  ：2922.21
+        实际的硬盘时间：1.660
+        实际的总用时  ：5.142
+
+
+        3. Selecting all of the information for a specific customer. An example of such a query would be select * from customer where customer_id=12;
+
+        explain analyze select * from customer where customer_id=12;
+        -----------------------------------------------------------------------------------------------------------------------------
+         Index Scan using customer_id_index on customer  (cost=0.00..8.02 rows=1 width=16) (actual time=0.050..0.051 rows=1 loops=1)
+           Index Cond: (customer_id = 12)
+         Planning Time: 0.326 ms
+         Execution Time: 0.087 ms
+        (4 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：8.02
+        实际的硬盘时间：0.50
+        实际的总用时  ：0.51
+
+        4. Inserting new customer or lot data. An example of such a query would be insert into customer values (250001, 'Vince', 'Smith' );
+
+        explain analyze insert into customer values (250001, 'Vince', 'Smith');
+        --------------------------------------------------------------------------------------------------
+         Insert on customer  (cost=0.00..0.01 rows=1 width=440) (actual time=0.198..0.198 rows=0 loops=1)
+           ->  Result  (cost=0.00..0.01 rows=1 width=440) (actual time=0.002..0.002 rows=1 loops=1)
+         Planning Time: 0.042 ms
+         Execution Time: 0.226 ms
+        (4 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：0.01
+        实际的硬盘时间：0.198
+        实际的总用时  ：0.198
+
+        5. Deleting a row of customer or lot data. An example of such a query would be delete from customer where customer_id='250001';
+
+        explain analyze delete from customer where customer_id='250001';
+        ----------------------------------------------------------------------------------------------------------------------------------
+         Delete on customer  (cost=0.00..8.02 rows=1 width=6) (actual time=0.053..0.053 rows=0 loops=1)
+           ->  Index Scan using customer_id_index on customer  (cost=0.00..8.02 rows=1 width=6) (actual time=0.022..0.023 rows=1 loops=1)
+                 Index Cond: (customer_id = 250001)
+         Planning Time: 0.110 ms
+         Execution Time: 0.209 ms
+        (5 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：8.02
+        实际的硬盘时间：0.053
+        实际的总用时  ：0.053
+
+        6. Updating a row of customer or lot data. An example of such a query would be update customer set customer_first_name='Vinny' where customer_id='249001';
+
+        explain analyze update customer set customer_first_name='Vinny' where customer_id='249001';
+        ------------------------------------------------------------------------------------------------------------------------------------
+         Update on customer  (cost=0.00..8.02 rows=1 width=234) (actual time=0.089..0.089 rows=0 loops=1)
+           ->  Index Scan using customer_id_index on customer  (cost=0.00..8.02 rows=1 width=234) (actual time=0.059..0.060 rows=1 loops=1)
+                 Index Cond: (customer_id = 249001)
+         Planning Time: 0.103 ms
+         Execution Time: 0.128 ms
+        (5 rows)
+        估计的硬盘时间：0
+        估计的总用时  ：8.02
+        实际的硬盘时间：0.089
+        实际的总用时  ：0.089
+
+        7. Selecting the average lot size of all lots. An example of such a query would be select avg(lot_size) from lot;
+
+        explain analyze select avg(lot_size) from lot;
+        --------------------------------------------------------------------------------------------------------------------------------------
+         Finalize Aggregate  (cost=5527.34..5527.35 rows=1 width=8) (actual time=36.621..36.621 rows=1 loops=1)
+           ->  Gather  (cost=5527.23..5527.34 rows=1 width=32) (actual time=36.515..37.952 rows=2 loops=1)
+                 Workers Planned: 1
+                 Workers Launched: 1
+                 ->  Partial Aggregate  (cost=4527.23..4527.24 rows=1 width=32) (actual time=32.823..32.824 rows=1 loops=2)
+                       ->  Parallel Seq Scan on lot  (cost=0.00..4159.58 rows=147058 width=8) (actual time=0.016..15.643 rows=125000 loops=2)
+         Planning Time: 0.149 ms
+         Execution Time: 38.030 ms
+        (8 rows)
+        估计的硬盘时间：5527.34
+        估计的总用时  ：5527.35
+        实际的硬盘时间：36.621
+        实际的总用时  ：36.621
+
+
+    +================+========================================================================+========================================================================+===========================+
+    |                |                                 Without Index                          |                                  With Index                            |  Performance Improvement  |
+    +================+===========================+========================+===================+===========================+========================+===================+===========================+
+    |   Query Number |   Estimated Disk Accesses |   Actual Disk Accesses |   Actual Run Time |   Estimated Disk Accesses |   Actual Disk Accesses |   Actual Run Time | Performance Improvement   |
+    +================+===========================+========================+===================+===========================+========================+===================+===========================+
+    |              1 |                   6437.98 |                 49.312 |            56.28  |                   6437.98 |                 38.684 |            46.593 | 17.212%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+    |              2 |                   6191.27 |                 36.152 |            36.434 |                   2922.21 |                  5.142 |             5.481 | 84.956%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+    |              3 |                   4279.33 |                 12.246 |            12.289 |                      8.02 |                  0.051 |             0.087 | 99.292%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+    |              4 |                      0.01 |                  0.058 |             0.078 |                      0.01 |                  0.198 |             0.226 | -189.7%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+    |              5 |                   4565.99 |                 15.398 |            15.443 |                      8.02 |                  0.053 |             0.209 | 98.646%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+    |              6 |                   4565.99 |                 17.157 |            17.186 |                      8.02 |                  0.089 |             0.128 | 99.255%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+    |              7 |                   5526.35 |                 22.92  |            24.348 |                   5527.35 |                 36.621 |            38.03  | -56.19%                   |
+    +----------------+---------------------------+------------------------+-------------------+---------------------------+------------------------+-------------------+---------------------------+
+
+    6. Given the data that you have now obtained, which queries do index structures slow down and which do they speed up? If query types 1, 2 and 3 are common (occurring 75% of the time) and types 4 is uncommon (occurring 25% of the time), does the increase in performance for some queries outweigh the decreases of others? How would your opinion change if the ratio were closer to 50% for queries 1, 2, and 3, and 50% for type 4?
+    速度提高的语句: 1, 2, 3, 5, 6
+    速度降低的语句: 4, 7
+
+    在第一种情况下，平均事件将是:
+        AvgTime(origin)    = (56.28+36.434+12.289)*0.75+0.078*0.25 = 78.77175 ms
+        AvgTime(optimized) = (46.593+5.481+0.087)*0.75+0.226*0.25 = 39.17725 ms
+        impoved 50.264%
+
+    在第二种情况下，平均事件将是:
+        AvgTime(origin)    = (56.28+36.434+12.289)*0.5+0.078*0.5 =52.5405 ms
+        AvgTime(optimized) = (46.593+5.481+0.087)*0.5+0.226*0.5 = 26.1935 ms
+        impoved 50.146%
+
+B. You are designing a database to store sensor records for a research study. For the first year, the database will mostly be populated via insert statements gathered from these sensors. After the first year, the database will mainly be queried for data via select statements. You must decide whether to index the database initially or wait until after the first year. From what you have witnessed, would you initially index the table or wait until after the first year? Explain.
+    等到第二年再开始做索引优化。
+    应为第一年中有大量的插入操作。如果此时做索引优化，那么插入操作和删除时，为了维护索引将耗费大量时间。
+    索引优化（包括聚簇）最好在数据表不再插入和删除时进行。
+
+C. You are employed by a local hospital as one of team of database professionals. A colleague has implemented a table that stores information about patients in PostgreSQL. You are asked to obtain all records for any female patient. You write a query select * from patient where gender='f'; You notice that query performance is poor. Your colleague who implemented the patient table is currently away and it is your responsibility to determine what is wrong. You first describe the patient table: 
+因为男女比例接近1:1，这样无法过滤大部分数据，所以dbms并不会利用索引查找，反而直接扫描更加快速。
+同时如果此时磁盘上数据的性别是均匀分布的，那么dbms将扫描所有页。
+此时进行聚簇优化，将男女分别聚簇，那么同一个页的数据几乎总是性别相同的，这样可以减少50%的扫描量。
+
+D. Recall that PostgreSQL stores statistics about tables in the system table called pg_class. The query planner accesses this table for every query. These statistics may only be updated using the analyze command. If the analyze command is not run often, the statistics in this table may not be accurate and the query planner may make poor decisions which can degrade system performance. Another strategy is for the query planner to generate these statistics for each query (including selects, inserts, updates, and deletes). This approach would allow the query planner to have the most up-to-date statistics possible. Why doesn't PostgreSQL do this?
+为每一类查询语句做planner的更新，对优化语句是好的选择，但却降低了整个语句的速度。
+为了时刻进行优化而更新planner并不是好的选择，更明智的做法是在固定时间间隔后做一次planner的更新，这样不仅考虑到优化，同时减少更新带来的冗余的操作。

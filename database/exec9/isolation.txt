@@ -1,0 +1,66 @@
+5.In the first window, select all of the data from the account table and place the output into the file isolation.txt. Be sure to label the data so that it is clear this data is from the first table. 
+
+id          balance
+1           105.59
+2           455.66
+
+
+6.In the second window, select all of the data from the account table and place the output into the file isolation.txt. Be sure to label the data so that it is clear this is data from the second window. 
+
+id          balance
+1           105.59
+2           1050.59
+
+
+8.In the second window, select all of the data from the account table and place the output into the file isolation.txt. Be sure to label the data so that it is clear this is data from the second window. What has changed about the data and why? Place the answer to this question in isolation.txt. 
+
+id          balance
+1           105.59
+2           455.66
+
+
+11.Set the transaction isolation level of the transaction in the second window to serializable. Place the code to do this in isolation.txt. 
+
+begin transaction isolation level serializable;
+
+
+14.Select all data from the account table in the first and second window and place it into isolation.txt. Be sure to label the data clearly to denote what data came from the first and second windows. 
+
+first window:
+id          balance
+1           105.59
+2           1400
+
+
+second window:
+id          balance
+2           455.66
+1           1
+
+
+16.Select all of the data from the account table in the second window. Has the data for the checking account changed? Why or why not? Has the data for the savings account changed in the first window? Why or why not? Places the answers to these questions in isolation.txt 
+
+没有改变。
+因为对于serializable，不出现所有问题（脏读、更新丢失、不可重复读和幻读）。
+原因是当事务结束后再释放锁。
+
+但对于默认的read committed事务隔离等级，可能出现更新丢失、不可重复读和幻读的问题。
+原因是read committed在做读操作时，持有独占锁（或排他锁），并不是在事务结束时释放？
+
+
+
+17.Commit the data in the second window. Display all of the data from the account table in both windows. Place the output of both windows into isolation.txt. Clearly label which data is from the first window and which data is from the second window. What do you notice now about the balances of the checking and savings accounts? Please explain. Place your explanation in isolation.txt.
+
+first window:
+id          balance
+1           105.59
+2           1400
+saving account数据没有改变，因为两个事务隔离等级都是serializable
+
+
+second window:
+id          balance
+2           455.66
+1           1
+checking account数据没有改变，因为两个事务隔离等级都是serializable
+

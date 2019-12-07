@@ -1,0 +1,84 @@
+drop table account;
+create table account
+(
+   id int,
+   balance float,
+   Primary Key(id) 
+);
+
+insert into account values (1, 105.59 );
+insert into account values (2, 1050.59 );
+
+
+--2.Begin a new transaction. 
+BEGIN TRANSACTION;
+
+--3.Select balance of the checking account and paste the output in a file named rollback.txt. 
+SELECT balance
+FROM account
+WHERE id = 2;
+/*Output:
+balance(float8)
+1050.59
+*/
+
+--4.Delete both the savings and the checking accounts. 
+--Place the SQL query to perform this operation in rollback.txt.
+DELETE
+FROM account;
+
+--5.Select all of the data in the account table and 
+--paste the output in rollback.txt.
+SELECT *
+FROM account;
+/*Output:
+
+*/
+
+--6.Roll back the transaction.
+ROLLBACK TRANSACTION;
+
+--7.Select the balance of the savings and checking accounts and paste the output in rollback.txt. 
+SELECT balance
+FROM account;
+/*Output:
+balance(float8)
+105.59
+1050.59
+*/
+
+--8.Begin a new transaction. 
+BEGIN TRANSACTION;
+
+--9.Delete the savings account. Place the SQL code to do this in rollback.txt. 
+DELETE
+FROM account
+WHERE id = 1;
+
+--10.Select all rows from the account table and paste the output in rollback.txt. 
+SELECT *
+FROM account;
+/*Output:
+id(int4)    balance(float8)
+2           1050.59
+*/
+
+--11.Commit the transaction. 
+COMMIT TRANSACTION;
+
+--12.Attempt to rollback the transaction that you have just committed. 
+--What values are stored in the tables? Please explain the effects 
+--of transaction commits and rollbacks you have observed above. 
+--Place your explanation in rollback.txt. 
+ROLLBACK TRANSACTION;
+/*Output:
+WARNING:  there is no transaction in progress
+
+Query returned successfully with no result in 31 ms.
+*/
+/*
+transaction commits:
+The "COMMIT TRANSACTION" keep all the modification between the "BEGIN TRANSACTION" and "COMMIT TRANSACTION". 
+transaction rollbacks:
+The "ROLLBACK TRANSACTION" return all the modification between the "BEGIN TRANSACTION" and "ROLLBACK TRANSACTION". 
+*/

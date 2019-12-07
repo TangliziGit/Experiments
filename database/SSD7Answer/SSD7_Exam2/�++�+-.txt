@@ -1,0 +1,82 @@
+------Step1---
+From a entity to a relational model...
+
+COACH(Name, Age)
+PK(Name)
+
+PLAYER(Name, Age)
+PK(Name)
+
+TEAM(Name, Colors)
+PK(Name)
+
+GAME(Number, Date, Score, Time)
+PK(Number)
+
+STADIUM(Name, Size, Location)
+PK(Name)
+
+------Step2---
+According to the relation 1:1,  we can create...
+
+COACH(Name, Age, ManageTeamName)
+PK(Name)
+FK(ManageTeamName) -> TEAM(Name)
+
+------Step3---
+According to the relation 1:N, we can create...
+
+PLAYER(Name, Age, TeamName)
+PK(Name)
+FK(TeamName) -> TEAM(Name)
+
+GAME(Number, Date, Score, Time, HostTeam, VisitorTeam)
+PK(Number)
+FK(HostTeam) -> TEAM(Name)
+FK(VisitorTeam) -> TEAM(Name)
+
+------Step4---
+According to the relation M:N, we can create...
+
+PRACTICE(Date, TeamName, Stadium)
+PK(TeamName, Stadium)
+FK(TeamName) -> TEAM(Name)
+FK(Stadium) -> STADIUM(Name)
+
+------Step5---
+According to the multi-valued attribute in this model...
+
+COLORS(TeamName, Color)
+PK(TeamName, Color)
+FK(TeamName) -> TEAM(Name)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+Inclusion:
+
+COACH(Name, Age, ManageTeamName)
+PK(Name)
+FK(ManageTeamName) -> TEAM(Name)
+
+PLAYER(Name, Age, TeamName)
+PK(Name)
+FK(TeamName) -> TEAM(Name)
+
+TEAM(Name, Colors)
+PK(Name)
+
+GAME(Number, Date, Score, Time, HostTeam, VisitorTeam)
+PK(Number)
+FK(HostTeam) -> TEAM(Name)
+FK(VisitorTeam) -> TEAM(Name)
+
+STADIUM(Name, Size, Location)
+PK(Name)
+
+PRACTICE(Date, TeamName, Stadium)
+PK(TeamName, Stadium)
+FK(TeamName) -> TEAM(Name)
+FK(Stadium) -> STADIUM(Name)
+
+COLORS(TeamName, Color)
+PK(TeamName, Color)
+FK(TeamName) -> TEAM(Name)

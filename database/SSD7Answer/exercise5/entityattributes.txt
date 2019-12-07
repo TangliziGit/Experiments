@@ -1,0 +1,18 @@
+Book entity containing attributes:Title, ISBN, Edition, Publication Date, Price and Description, PK=ISBN
+Author entity containing attributes:Author Name and Author Id, PK=Author Id.
+Publisher entity containing attributes: Publisher Id, Name, Address, PK=Publisher Id, AK=Name+Address
+Customer entity containing attributes: Customer Id, Name, Mailing Address, Credit Card Number, Credit Card Expiration Date, Phone Number and Email address, PK=Customer Id.
+Shipment entity containing attributes: Date of Shipment, Tracking Number, Expected Delivery Date, PK=Tracking Number
+Order entity containing attributes: Order Number, Mailing Address, Method of Shipment, Date and Time of Order, Total Price, PK=Order Number
+Promotion entity containing attributes:Promotion Id, Percentage Discount, Start Date of Promotion, End Date of Promotion, PK=Promotion Id.
+Category entity containing attributes: Category Id and Category Name, PK=Category Id.
+
+LineItem entity containing attributes: title price and quantity ordered. Primary key is Tracking Number of shipment and isbn of the book that composes this line item. The foreign key of this table is the ISBN referencing the book table.(Weak entity)
+
+
+
+
+
+
+
+

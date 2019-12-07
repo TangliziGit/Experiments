@@ -1,0 +1,98 @@
+--drop table account;
+create table account
+(
+   id int,
+   balance float,
+   Primary Key(id) 
+);
+
+insert into account values (1, 105.59 );
+insert into account values (2, 1050.59 );
+
+                              /*Window 1*/
+--3.3.	Begin new transactions in both windows. 
+BEGIN TRANSACTION;
+
+--5.Update the checking account's balance to 1400.00 in the first window. 
+--Does the update occur? Why or why not? 
+UPDATE account 
+SET balance = 1400.00
+WHERE id = 2;
+/*Answer:
+Update does not occur.It is waiting.
+Current transaction is aborted, commands ignored until end of transaction block
+Because This results in the second connection waiting until the first connection releases its locks.
+*/
+
+--6.Commit the transaction in the second window. 
+--What do you notice happening in the first window? Please explain.
+/*Answer:
+The update occurs.
+Because the transacion in the second window is commited, the resoure is released.So the blocking is eliminated
+*/
+
+--7.Commit the transaction in the first window.
+COMMIT TRANSACTION;
+
+--8.Begin a new transaction in each window.
+BEGIN TRANSACTION;
+
+--10.Update the checking account balance to 2000.00 in the first window.
+UPDATE account 
+SET balance = 2000.00
+WHERE id = 2;
+
+--11.Update the savings account balance to 1400.00 in the first window.
+UPDATE account 
+SET balance = 1400.00
+WHERE id = 1;
+
+--14.Try selecting the all of the data from the account table in each window. What do you notice?
+SELECT * 
+FROM account;
+/*Output:
+ERROR:  current transaction is aborted, commands ignored until end of transaction block
+*/
+
+
+                                /*Window 2*/
+--3.Begin new transactions in both windows. 
+BEGIN TRANSACTION;
+
+--4.Update the checking account's balance to 455.75 in the second window.
+UPDATE account
+SET balance = 455.75
+WHERE id = 2;
+
+--6.Commit the transaction in the second window. 
+--What do you notice happening in the first window? Please explain.
+COMMIT TRANSACTION;
+
+--8.Begin a new transaction in each window.
+BEGIN TRANSACTION;
+
+--9.Update the savings account balance to 2400.00 in the second window.
+UPDATE account
+SET balance = 2400.00
+WHERE id = 1;
+
+--12.Update the checking account balance to 1000.50 in the second window.
+UPDATE account
+SET balance = 1000.50
+WHERE id = 2;
+
+--13.What happens to the transactions? Why? 
+/*Answer:
+The deadlock occurs. 
+Explaination: two sessions have locks on separate objects and each process is 
+trying to acquire a lock on the object that the other process has.
+*/
+
+--14.Try selecting the all of the data from the account table in each window. What do you notice?
+SELECT * 
+FROM account;
+/*Output:
+id(int4)    balance(float)
+2           2000
+1           1400
+*/

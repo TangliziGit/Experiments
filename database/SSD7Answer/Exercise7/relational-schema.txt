@@ -1,0 +1,102 @@
+------Step1---
+From a entity to a relational model...
+
+Category(Category_id, CategoryName)
+PK(Category_id)
+
+Publisher(Publisher_id, PublisherName, PublisherAddress)
+PK(Publisher_id)
+
+BookTitle(Author,Title, ISBN, Edition, PublicationDate, Price, BookDescription)
+PK(ISDN)
+
+Promotion(Promotion_id, Discount, StartDate, EndDate)
+PK(Promotion_id)
+
+Shipment(Tracking_num, ShipmentDate, ExpectedDate)
+PK(Tracking_num)
+
+Order(Order_num, MailAddress, MethodShipment, ShippingDate, DateOrderTime)
+PK(Order_num)
+
+Customer(Customer_id, CustomerName, MailAddress, CreditNumer, EmailAddress)
+PK(Customer_id)
+
+------Step2---
+There is not 1:1 relation, so the step2 is cancelled.
+
+------Step3---
+According to the relation 1:N, we can create...
+
+LineItem(ShippingCost, PurchasedQuantity, BookPrice, Tax, ISBN, Tracking_num, Order_num)
+PK(ISBN, Tracking_num)
+FK(ISBN) -> BookTitle(ISBN)
+FK(Order_num) -> Order(Order_num)
+FK(Tracking_num) -> Shipment(Tracking_num)
+
+Category(Category_id, CategoryName, SubCategory_id)
+PK(Category_id)
+FK(SubCategory_id) -> Category(Category_id)
+
+BookTitle(Author,Title, ISBN, Publisher_id, Edition, PublicationDate, Price, BookDescription, Category_id, Order_num)
+PK(ISBN)
+FK(Publisher_id) -> Publisher(Publisher_id)
+FK(Category_id) -> Category(Category_id)
+FK(Order_num) -> Order(Order_num)
+
+Order(Order_num, Customer_id, Tracking_num, MailAddress, MethodShipment, ShippingDate, DateOrderTime)
+PK(Order_num)
+FK(Customer_id) -> Customer(Customer_id)
+FK(Tracking_num) -> Shipment(Tracking_num)
+
+------Step4---
+According to the relation M:N, we can create...
+
+Book_Promotion(ISBN, Promotion_id)
+PK(ISBN, Promotion_id)
+FK(ISBN) -> Book(ISBN)
+FK(Promotion_id) -> Promotion(Promotion_id)
+
+------Step5---
+There is not multi-valued attribute in this model, so the step 5 is cancelled.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+Inclusion:
+
+Category(Category_id, CategoryName, SubCategory_id)
+PK(Category_id)
+FK(SubCategory_id) -> Category(Category_id)
+
+Publisher(Publisher_id, PublisherName, PublisherAddress)
+PK(Publisher_id)
+
+BookTitle(Author,Title, ISBN, Publisher_id, Edition, PublicationDate, Price, BookDescription, Category_id, Order_num)
+PK(ISBN)
+FK(Publisher_id) -> Publisher(Publisher_id)
+FK(Category_id) -> Category(Category_id)
+FK(Order_num) -> Order(Order_num)
+
+Promotion(Promotion_id, Discount, StartDate, EndDate)
+PK(Promotion_id)
+
+Shipment(Tracking_num, ShipmentDate, ExpectedDate)
+PK(Tracking_num)
+
+Order(Order_num, Customer_id, Tracking_num, MailAddress, MethodShipment, ShippingDate, DateOrderTime)
+PK(Order_num)
+FK(Customer_id) -> Customer(Customer_id)
+FK(Tracking_num) -> Shipment(Tracking_num)
+
+Customer(Customer_id, CustomerName, MailAddress, CreditNumer, EmailAddress)
+PK(Customer_id)
+
+LineItem(ShippingCost, PurchasedQuantity, BookPrice, Tax, ISBN, Tracking_num, Order_num)
+PK(ISBN, Tracking_num)
+FK(ISBN) -> BookTitle(ISBN)
+FK(Order_num) -> Order(Order_num)
+FK(Tracking_num) -> Shipment(Tracking_num)
+
+Book_Promotion(ISBN, Promotion_id)
+PK(ISBN, Promotion_id)
+FK(ISBN) -> Book(ISBN)
+FK(Promotion_id) -> Promotion(Promotion_id)

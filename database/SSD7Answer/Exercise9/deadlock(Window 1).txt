@@ -1,0 +1,55 @@
+--drop table account;
+create table account
+(
+   id int,
+   balance float,
+   Primary Key(id) 
+);
+
+insert into account values (1, 105.59 );
+insert into account values (2, 1050.59 );
+
+/*Window 1*/
+--3.3.	Begin new transactions in both windows. 
+BEGIN TRANSACTION;
+
+--5.Update the checking account's balance to 1400.00 in the first window. 
+--Does the update occur? Why or why not? 
+UPDATE account 
+SET balance = 1400.00
+WHERE id = 2;
+/*Answer:
+Update does not occur.It is waiting.
+Current transaction is aborted, commands ignored until end of transaction block
+Because This results in the second connection waiting until the first connection releases its locks.
+*/
+
+--6.Commit the transaction in the second window. 
+--What do you notice happening in the first window? Please explain.
+/*Answer:
+The update occurs.
+Because the transacion in the second window is commited, the resoure is released.So the blocking is eliminated
+*/
+
+--7.Commit the transaction in the first window.
+COMMIT TRANSACTION;
+
+--8.Begin a new transaction in each window.
+BEGIN TRANSACTION;
+
+--10.Update the checking account balance to 2000.00 in the first window.
+UPDATE account 
+SET balance = 2000.00
+WHERE id = 2;
+
+--11.Update the savings account balance to 1400.00 in the first window.
+UPDATE account 
+SET balance = 1400.00
+WHERE id = 1;
+
+--14.Try selecting the all of the data from the account table in each window. What do you notice?
+SELECT * 
+FROM account;
+/*Output:
+ERROR:  current transaction is aborted, commands ignored until end of transaction block
+*/

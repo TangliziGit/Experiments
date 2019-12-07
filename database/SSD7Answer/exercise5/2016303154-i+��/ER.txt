@@ -1,0 +1,60 @@
+Entities: 
+1.Book: 
+	Author{ID(PK),
+	Name(Fname,Mname,Lname)},
+	Title,ISBN(PK),
+	Publisher,
+	Edition,
+	Date of Publication,
+	Price,
+	Book Description,
+	Categories{CategoryID(PK),subcategoryid}
+2.Publisher: 
+	Name(PK), 
+	Address 
+3.Customer: 
+	Name(Fname,Mname,Lname),
+	Mailing Address,
+	Credit Card Number,
+	Phone Number,
+	Email Address 
+4.Order:
+	OrderNumber(PK), 
+	Customer, 
+	Mailing Address, 
+	Credit Card, 
+	Ship Method, 
+	Ship Date, 
+	Time Of Order,
+	Price Of Order
+5.Promotion: 
+	PromotionID(PK), 
+	ISBN, 
+	Percentage Discount Points, 
+	Duration of Promotion(Start Date, End Date)
+6.Shipment:
+	TrackingNumber(PK) 
+	OrderNumber 
+	ShippingDate
+	ExceptedDiliveredDate
+	Quantity 
+
+Weak Entity
+1.Promotion:the WeakEntity of the ISBN(Book)
+	Percentage Discount Points
+        Start Date 
+        End Date
+      
+2.FullfilledOrder:the WeakEntity of the OrderNumber(Order)
+        Date of Shipment 
+        Tracking Number
+        Date of Expected Delivery
+
+Relationships:
+1.HAS: <Category,BookTitle>, 1:N, PARTIAL/TOTAL;
+2.SHIP: <Shipment,Order>, 1:N, PARTIAL/TOTAL;
+3.PUBLISH: <Publisher,BookTitle>, 1:N, TOTAL/TOTAL;
+4.PROMOTE: <Promotion,BookTitle>, N:N, PARTIAL/TOTAL;
+5.OEDER: <Customer,Order>, 1:N, PARTIAL/TOTAL;
+6.HAS:<Category, Category>, 1:N, PARTIAL/TOTAL;
+

@@ -1,0 +1,41 @@
+/*Window 2*/
+--3.Begin new transactions in both windows. 
+BEGIN TRANSACTION;
+
+--4.Update the checking account's balance to 455.75 in the second window.
+UPDATE account
+SET balance = 455.75
+WHERE id = 2;
+
+--6.Commit the transaction in the second window. 
+--What do you notice happening in the first window? Please explain.
+COMMIT TRANSACTION;
+
+--8.Begin a new transaction in each window.
+BEGIN TRANSACTION;
+
+--9.Update the savings account balance to 2400.00 in the second window.
+UPDATE account
+SET balance = 2400.00
+WHERE id = 1;
+
+--12.Update the checking account balance to 1000.50 in the second window.
+UPDATE account
+SET balance = 1000.50
+WHERE id = 2;
+
+--13.What happens to the transactions? Why? 
+/*Answer:
+The deadlock occurs. 
+Explaination: two sessions have locks on separate objects and each process is 
+trying to acquire a lock on the object that the other process has.
+*/
+
+--14.Try selecting the all of the data from the account table in each window. What do you notice?
+SELECT * 
+FROM account;
+/*Output:
+id(int4)    balance(float)
+2           2000
+1           1400
+*/

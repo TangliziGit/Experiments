@@ -1,0 +1,17 @@
+1.The results of s-r:
+  A  B  C
+  b  g  a
+
+2. ( SELECT   MemNo
+     FROM     MEMBER, BOOK
+     WHERE    MemNo = BorrowerMemNo AND
+     CallNumber = 'QA76.9.D26C66'
+   )
+   Except
+   ( SELECT   MemNo
+     FROM     MEMBER, BOOK
+     WHERE    MemNo = BorrowerMemNo AND
+     CallNumber = 'QA76.9.D7E53'
+   );
+The results:
+This operation get a list of the MemNo whose CallNumber is 'QA76.9.D26C66' but not 'QA76.9.D7E53' with the constrains of "MemNo = BorrowerMemNo" 

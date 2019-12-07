@@ -1,0 +1,115 @@
+
+1. 
+  1 Section A.
+    The incorret isolation level  will cause each transaction to see an inconsistent view of the data. Consider the following sequence of events: ( The savings balance is initially zero. )
+
+    Willian                       Julie
+    select savings balance        select savings balance
+    balance = 0                   balance =0
+    add $400                      deduct $100
+    balance = 400                 blocked
+    commit                        balance = -100
+    balance = 400                 commit
+                                  balance = -100
+       
+    The balance should have been $300. The transaction boundaries need to be adjusted to allow maximum throughput for all users. Particularly, once a user gets a lock on a data item, he will hold it until this ATM session ends. Pausing for user input within a transaction also leads to poor throughput as one user can cause others to wait until he releases his locks on the data items. Pausing for use will leave a transaction holding locks for an arbitrarily long time.
+
+
+  2 Section B
+    This scenario does place the confirmation messages in the correct positions, but some user input is still accepted within transactions and the isolation level is incorrectly set.
+
+
+  3 Section C
+   This scenario places the correct isolation level on the transactions, but still suffers from accepting user input within a transaciton. And the isolation level is still incorrectly set.  
+   The isolation level in this case is too strict. Given that these are the only transactions executing in the  database, phantom reads are not possible, so repeatable read isolation is appropriate.
+
+
+  4 Section D.
+          Willian
+
+ ATM prompts user for operation.
+ William Chooses Deposit into Savings.
+ ATM prompts user for amount.
+ William enters 400.
+
+  Begin transaction(serializable isolation level)
+  Select balance of savings
+  savings_balance = saving_balance + $400
+  Update savings balance in database.
+  End Transaction
+
+ ATM displays confirmation fo deposit.
+ ATM propmpts user for operation.
+ William chooses transfer from checking to savings.
+ ATM prompts user for amount.
+ William enters 300.
+
+  Begin transaction (serializable isolation level)
+  Select the checking balance.
+  checking_balance = checking_balance -$300
+  Select the savings balance.
+  savings_balance = savings_balance +$300
+
+ Update savings balance in database.
+ Update checking balance in database.
+ End Trensaction
+ ATM displays confirmation of transfer.
+ ATM Prompt user for operation.
+ William chooses no more operations.
+
+
+
+      Julie
+ ATM prompts user for operation.
+ Julie Chooses Deposit into Checking.
+ ATM Prompts user for amount.
+ Julie enters 500.
+  
+ Begin transaction (serializable isolation level)
+ Select balance of checking 
+ checking_balance = checking_balance + $500 
+ Update checking balance in database.
+ End Transaction 
+ ATM displays confirmation of deposit.
+ ATM prompts user for operation.
+ Julie chooses withdrawal from savings.
+ ATM prompts user for amount.
+ Julie enters 100.
+
+ Begin transaction (serializable isolation level)
+ Select the savings checking balance in database.
+ savings_balance = savings_balance - $100 
+ Update savings balance in database. 
+ End Transaction 
+
+ ATM displays confirmation of withdrawal.
+ ATM Prompt user for operation.
+ Julie chooses no more operations. 
+
+
+
+2. 
+   1. An explanation as to where the transaction begins and ends.
+      The codes are as follows.
+
+      System.out.println( "Please enter the number of seats that you want to buy: " );
+		numseats = Integer.parseInt( keyIn.readLine() );
+
+		// Begin a new, chained, transaction.
+		stmt.executeUpdate( "Begin Work" );
+
+		// Set the transaction isolation level to serializable
+		stmt.executeUpdate( "set transaction isolation level serializable" );
+
+		// Query the database for the number of available standrd seats.
+		sqlquery = new String( "select available_standard_seats from showing where                  movie_id = " + movie_id );
+		rset = stmt.executeQuery( sqlquery );
+
+  2. The following two queries must be protected by a transaction boundary as two users may      see an inconsistent view of the data.  
+
+  3.  The transaction should be run at the serializable isolation level.  If the                  transaction were run at read committed, then two transactions may both 
+      request more seats than are available.
+
+
+
+  

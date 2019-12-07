@@ -1,0 +1,81 @@
+/*Window 2*/
+--3.Begin new transactions in both windows. 
+BEGIN TRANSACTION;
+
+--6.In the second window, select all of the data from the account table 
+--and place the output into the file isolation.txt. 
+SELECT *
+FROM account;
+/*
+Output:
+id(int4)    balance(float8)
+1           105.59
+2           1050.59
+*/
+
+--8.In the second window, select all of the data from the account table 
+--and place the output into the file isolation.txt.
+SELECT *
+FROM account;
+/*
+Output:
+id(int4)    balance(float8)
+1           105.59
+2           455.66
+*/
+/*Changes:
+The balance of the checking account has been modified as 455.66.
+Because the transaction of the window 1 has committed. 
+*/
+
+--9.Commit the transaction in second window. 
+COMMIT TRANSACTION;
+
+--11.Set the transaction isolation level of the transaction in the second window to serializable.
+SET TRANSACTION ISOLATION LEVEL Serializable;
+
+--13.In the second window, set the balance of savings account balance to 1. 
+UPDATE account
+SET balance = 1
+WHERE id = 1;
+
+--14.Select all data from the account table in the first and second window 
+--and place it into isolation.txt. 
+SELECT *
+FROM account;
+/*
+Output:
+id(int4)    balance(float8)
+2           455.66
+1           1
+*/
+
+--16.Select all of the data from the account table in the second window.
+SELECT *
+FROM account;
+/*
+Output:
+id(int4)    balance(float8)
+2           455.66
+1           1
+*/
+/*
+The data of the checking acount didn't change.
+Beacuse the two transactions are Serializable.
+*/
+
+--17.Commit the data in the second window. Display all of the data from the account table in both windows.
+COMMIT TRANSACTION;
+
+SELECT *
+FROM account;
+/*
+Output:
+id(int4)    balance(float8)
+2           455.66
+1           1
+*/
+/*
+The data of the checking acount didn't change.
+Beacuse the two transactions are Serializable.
+*/

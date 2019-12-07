@@ -1,0 +1,142 @@
+Step1:For strong entity,Create a new table. 
+      Including as its columns, all the simple attributes and simple components of the composite attributes . 
+      Identify the primary key and the alternate keys. Do not include any multi-valued attribute as a key. 
+      
+  Book(Title,ISBN,Author,Edition,Date of Publication,Price,Book Description)
+  PK(ISBN)
+
+  Author(Author_id,Name)
+  PK(Author_id)
+  AK(Name)
+  
+  Publisher(Publisher_id,Publisher Name,Address)
+  PK(Publisher_id)
+
+  Customer(Customer_id, Name,CreditCardNumber,MailingAddress,PhoneNumber,EmailAddress)
+  PK(Customer_id)
+
+  Shipment(Date,Tracking Number,Method)
+  PK(Tracking Number)
+
+  Order(Order_num,MethodShipment,ShippingDate,OrderTime)
+  PK(Order_num)
+  
+  Promotion(Promotion_id,DiscountPercentage,StartDate,EndDate)
+  PK(Promotion_id)
+
+  Category(Category_id,Category_Name)
+  PK(Category_id)
+
+
+Step2:For weak entity,including as its columns, all the simple attributes and simple components of the composite attributes . 
+
+  LineItem(Shipping Price,Purchased Quantity,Book Price)
+
+Step3:For each relationship that is "1:N",Identify "1" is the father entity,"N"is the children entity,
+      Including as a foreign key in children entity, the primary key of father entity. 
+   
+   Publisher£­Book:
+   Book(Title,ISBN,Author,Edition,Date of Publication,Price,Book Description,Publisher_id)
+   PK(ISBN)
+   FK(Publisher_id)->Publisher(Publisher_id)
+
+   Supercategory-category:
+   Category(Category_id,Category_Name,Supercategory_id)
+   PK(Category_id)
+   FK(Supercategory_id) -> Category(Category_id)
+
+   Book£­LineItem, Order£­LineItem, Shipment£­LineItem£º
+   LineItem(Shipping Price,Purchased Quantity,Book Price,ISBN, Order_Number, Tracking_Number)
+   PK(ISBN, Tracking_Number)
+   FK(ISBN) -> Book(ISBN)
+   FK(Order_Number) -> Order(Order_num)
+   FK(Tracking_Number) -> Shipment(Tracking_Number)
+
+   Order(Order_num,MethodShipment,ShippingDate,OrderTime,Customer_id)
+   PK(Order_num)
+   FK(Customer_id) -> Customer(Customer_id)
+
+Step4:For a relationship that is "1:1".
+      None.
+Step5:For a recursive relationship that "1:1".
+      None
+Step6:a superclass or a subroutine contact.
+      None
+
+Step7:For a relationship that is "1:N",establish a relationship that is the primary key 
+      take part in this relationship,Include it as a foreign key.
+
+   Book_Promotion(ISBN, Promotion_id)
+   PK(ISBN, Promotion_id)
+   FK(ISBN) -> Book(ISBN)
+   FK(Promotion_id) -> Promotion(Promotion_id)
+
+   Book_Category(ISBN, Category_id)
+   PK(ISBN, Category_id)
+   FK(ISBN) -> Book(SIBN)
+   FK(Category_id) -> Category(Category_id)
+
+   Book_Author(ISBN, Author_id)
+   PK(ISBN, Author_id)
+   FK(ISBN) -> Book(ISBN)
+   FK(Author_id) -> Author(Author_id)
+
+
+Step8£ºcomplicated relationship.
+      None
+Step9£ºmulti-valued attribute .
+      None.
+
+**************************************************************************
+Book(Title,ISBN,Author,Edition,Date of Publication,Price,Book Description,Publisher_id)
+PK(ISBN)
+FK(Publisher_id)->Publisher(Publisher_id)
+
+Author(Author_id,Name)
+PK(Author_id)
+AK(Name)
+
+Publisher(Publisher_id,Publisher Name,Address)
+PK(Publisher_id)
+
+Customer(Customer_id, Name,CreditCardNumber,MailingAddress,PhoneNumber,EmailAddress)
+PK(Customer_id)
+
+Shipment(Date,Tracking Number,Method)
+PK(Tracking Number)
+
+Order(Order_num,MethodShipment,ShippingDate,OrderTime,Customer_id)
+PK(Order_num)
+FK(Customer_id) -> Customer(Customer_id)
+
+Promotion(Promotion_id,DiscountPercentage,StartDate,EndDate)
+PK(Promotion_id)
+
+Category(Category_id,Category_Name,Supercategory_id)
+PK(Category_id)
+FK(Supercategory_id) -> Category(Category_id)
+
+LineItem(Shipping Price,Purchased Quantity,Book Price,ISBN, Order_Number, Tracking_Number)
+PK(ISBN, Tracking_Number)
+FK(ISBN) -> Book(ISBN)
+FK(Order_Number) -> Order(Order_num)
+FK(Tracking_Number) -> Shipment(Tracking_Number)
+
+Book_Promotion(ISBN, Promotion_id)
+PK(ISBN, Promotion_id)
+FK(ISBN) -> Book(ISBN)
+FK(Promotion_id) -> Promotion(Promotion_id)
+
+Book_Category(ISBN, Category_id)
+PK(ISBN, Category_id)
+FK(ISBN) -> Book(SIBN)
+FK(Category_id) -> Category(Category_id)
+
+Book_Author(ISBN, Author_id)
+PK(ISBN, Author_id)
+FK(ISBN) -> Book(ISBN)
+FK(Author_id) -> Author(Author_id)
+
+
+
+

@@ -1,0 +1,66 @@
+
+1.
+ create table account
+(
+   id int,
+   balance float,
+   Primary Key(id) 
+);
+
+insert into account values (1, 105.59 );
+insert into account values (2, 1050.59 );
+
+2.
+BEGIN TRANSACTION ;
+
+3. 
+   The sql sentences are as below:
+
+SELECT balance FROM account 
+WHERE id = 2;
+
+   The output are as below:
+
+   行   balance
+   1    1050.59
+4.
+    The sql sentence is as below:
+    DELETE id FROM account WHERE id = 1 or id = 2;
+
+5. 
+    The sql sentence is as below:
+
+    There is no output:
+    行   id(int4)   balance
+6. The sql sentence is as follows: ROLLBACK;
+
+7. The sql sentence is as below:
+
+   SELECT balance FROM account
+   WHERE id = 1 or id = 2;
+
+   The outout are as below:
+    行   balance
+    1    105.59
+    2    1050.59
+8. The sql sentence is as follows: BEGIN TRANSACTION;
+
+9. The sql sentence is as below: 
+   DELETE FROM account 
+   WHERE id = 1;
+10. The sql sentence is as follows: SELECT * FROM account;
+    The output is as below:
+    行   id(int4)   balance
+    1    2          1050.59
+
+11. The sql sentence is as follows: COMMIt;
+
+12. The sql sentence is as follows: ROLLBACK;
+    There is no value stored in the table account.
+    And there is an warning: there is no transaction in progress.
+    Explaination: because the transaction has been committed, 
+                  there is no transaction in progress, so if
+                  we attempt to rollback the transaction, there
+                  will be an warning.
+
+  

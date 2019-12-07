@@ -1,0 +1,135 @@
+
+1.In step1, we map all the entities types into tables and define their primary keys PKs and alternate keys AKs.
+
+S1  BOOK(Title,ISBN,Edition,Publish_Date,Price,Description)
+S1  PK(ISBN)
+
+S1  AUTHOR(AuthorName,AuthorID)
+S1  PK(AuthorID)
+
+S1  PUBLISHER(publisherID,Name,Address)
+S1  PK(publisherID)
+S1  AK(Name,Address)
+
+S1  CUSTOMER(CustomerID,CustomerName,MailAddress,CreditNumber,EmailAddress)
+S1  PK(CustomerID)
+
+S1  SHIPMENT(ShipmentDate,TrackingNumber,ExpectedDate)
+S1  PK(TrackingNumber)
+
+S1  ORDER(OrderNumber, MailAddress, Method, DateTime, TotalPrice)
+S1  PK(OrderNumber)
+
+S1  PROMOTION(PromotionNumber,Discount,Start,End)
+S1  PK(PromotionNumber)
+
+S1  CATEGORY(CategoryID,CategoryName)
+S1  PK(CategoryID)
+S1  AK(CategoryName)
+
+2.In step 2, we do not take any action, since there are no weak entities satisfying the 1:1 relationship constraint.
+
+3.In step 3, we create a table for each remaining weak entity that was not handled in step 2.
+
+OrderItem has particpate a 1:N relationship.
+
+S3  OrderItem(OrderNumber,Book,Quantity,Price)
+S3  PK(OrderNumber,BookTitle)
+S3  FK(OrderNumber)->ORDER(OrderNumber)
+S3  FK(Book)->BOOK(ISBN)
+
+4.In Step 4, we consider the binary 1:1 relationships. 
+But in this model,there is no 1:1 relationship.
+
+
+5.In step 5, we only consider 1:N relationships.
+
+In this model,there are four such relationships.In each case, we choose the table that corresponds to the N-side 
+of the relationship and collapse the relationship in the selected table including all the attributes of the 
+relationship as columns in the table. 
+
+In my model ,following four relationship satisfy the 1:N.
+
+S1  BOOK(Title,ISBN,Edition,PublishDate,Price,Description,publisherID,CategoryID)
+S1  PK(ISBN)
+S5  FK(publisherID)->PUBLISHER(publisherID)
+S5  FK(CategoryID)->CATEGORY(CategoryID)
+
+S1  ORDER(OrderNumber, MailAddress, Method, DateTime, TotalPrice,CustomerID)
+S1  PK(OrderNumber)
+S5  FK(CustomerID)->CUSTOMER(CustomerID)
+
+S1  SHIPMENT(ShipmentDate,TrackingNumber,ExpectedDate,OrderNumber)
+S1  PK(TrackingNumber)
+S5  FK(OrderNumber)->ORDER(OrderNumber)
+
+S1  CATEGORY(CategoryID,CategoryName,SuperID)
+S1  PK(CategoryID)
+S1  AK(CategoryName)
+S5  FK(SuperID)->CATEGORY(CategoryID)
+
+
+6.In step 6, we consider the M:N relationships.  We create a new table to store this relationship and its attribute.
+In my model,WRITE and PROMOTE are such relationships.
+
+S6  WRITE(ISBN,AuthorID)
+S6  PK(ISBN,AuthorID)
+S6  FK(ISBN)->BOOK(ISBN)
+S6  FK(AuthorID)->AUTHOR(AuthorID)
+
+S6  PROMOTE(PromotionNumber,ISBN)
+S6  PK(PromotionNumber,ISBN)
+S6  FK(PromotionNumber)->PROMOTION(PromotionNumber)
+S6  FK(ISBN)->BOOK(ISBN)
+
+
+7.In step 2, we do not take any action.Because we have no multi-valued attribute in this model.
+
+
+Let us conclude by listing the entire relational schema produced above. It is worth recalling here that PK, AK, and FK correspond to PRIMARY KEY, UNIQUE and FOREIGN KEY REFERENCES statements, respectively, in SQL. 
+
+S1  BOOK(Title,ISBN,Edition,PublishDate,Price,Description,publisherID,CategoryID)
+S1  PK(ISBN)
+S5  FK(publisherID)->PUBLISHER(publisherID)
+S5  FK(CategoryID)->CATEGORY(CategoryID)
+
+S1  AUTHOR(AuthorName,AuthorID)
+S1  PK(AuthorID)
+
+S1  PUBLISHER(publisherID,Name,Address)
+S1  PK(publisherID)
+S1  AK(Name,Address)
+
+S1  CUSTOMER(CustomerID,CustomerName,MailAddress,CreditNumber,EmailAddress)
+S1  PK(CustomerID)
+
+S1  SHIPMENT(ShipmentDate,TrackingNumber,ExpectedDate,OrderNumber)
+S1  PK(TrackingNumber)
+S5  FK(OrderNumber)->ORDER(OrderNumber)
+
+S1  ORDER(OrderNumber, MailAddress, Method, DateTime, TotalPrice,CustomerID)
+S1  PK(OrderNumber)
+S5  FK(CustomerID)->CUSTOMER(CustomerID)
+
+S1  PROMOTION(PromotionNumber,Discount,Start,End)
+S1  PK(PromotionNumber)
+
+S1  CATEGORY(CategoryID,CategoryName,SuperID)
+S1  PK(CategoryID)
+S1  AK(CategoryName)
+S5  FK(SuperID)->CATEGORY(CategoryID)
+
+S3  OrderItem(OrderNumber,Book,Quantity,Price)
+S3  PK(OrderNumber,BookTitle)
+S3  FK(OrderNumber)->ORDER(OrderNumber)
+S3  FK(Book)->BOOK(ISBN)
+
+S6  WRITE(ISBN,AuthorID)
+S6  PK(ISBN,AuthorID)
+S6  FK(ISBN)->BOOK(ISBN)
+S6  FK(AuthorID)->AUTHOR(AuthorID)
+
+S6  PROMOTE(PromotionNumber,ISBN)
+S6  PK(PromotionNumber,ISBN)
+S6  FK(PromotionNumber)->PROMOTION(PromotionNumber)
+S6  FK(ISBN)->BOOK(ISBN)
