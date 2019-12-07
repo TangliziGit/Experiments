@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#define INC_N 20
+#define DEC_N 20
+
+int main(int is_parent){
+    int *res;
+    pthread_t thread_id;
+
+    if (is_parent){
+        pthread_create(&thread_id, NULL, (void *)main, 0);
+        pthread_join(thread_id, (void**)&res);
+    }
+
+    printf("parent:%d thread_id:%lld\n", is_parent, thread_id);
+
+    sleep(1);
+    for (int i=0; i<INC_N; i++){
+        if (is_parent)
+            printf("parent: %3d\n", i);
+        else
+            printf("thread: %3d\n", i);
+    }
+
+    if (is_parent)
+        pthread_exit((void*)0);
+
+    return 0;
+}
