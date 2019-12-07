@@ -1,0 +1,10 @@
+面临困境：
+have difficulty attracting new customers to their service, and existing customers have been switching to rival companies at an alarming rate.
+目的：
+regain its market share and continue to grow the personal stock trading side of the business.
+存在问题：
+软件更新时间，60%-5%
+infrastructure花费过多；
+软件维护费用高于公司其他软件平均维护费用25%，必须降低到15%；
+缺少额外服务（70%需要）：实时股市行情，搜索分析股票的能力，直接从其他金融机构转钱的能力，网上使用不强制下客户端
+2%用户交易出现错误，降低到0%
